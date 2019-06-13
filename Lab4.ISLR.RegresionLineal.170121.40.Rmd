@@ -1,0 +1,235 @@
+```{r}
+# Importando librerias que tienen fucniones estadisticas y el Dataframe Boston
+library(MASS)
+library(ISLR)
+
+
+# Para mostrar el contenido de Boston
+ Boston
+
+# Para ver los nombres de las columnas que tiene Boston
+ names(Boston)
+
+### Dado los datos de Boston, se requiere predecir el valor de la variable medv, por medio 
+### de las 13 variables restantes que se tienen. 
+
+#Para mostrar la descripcion de cada feature o variable
+ ?Boston
+
+## De todas las variables, "medv"será la variable dependiente o respuesta y 
+## "lstat" será la variable independiente o predictor.
+
+# Se va a utilizar la funcion lm para predecir por medio de un modelo lineal simple
+# lm.fit=lm(medv~lstat)
+
+# Se observa que la funcion anterior da un error ya que no se está especificando el dataframe.
+lm.fit=lm(medv~lstat, data=Boston)
+
+# Se asigna a Boston como el dataframe en curso o actual
+attach(Boston)
+
+# Se comprueba que ahora la linea siguiente ya no muestra error
+lm.fit=lm(medv~lstat)
+
+
+
+# Se muestran los valores del modelo
+lm.fit
+
+# Para mas detalle se ejecuta un summary
+summary(lm.fit)
+
+# Ahora se muestra otro tipo de información interesante por medio de names aplicado al modelo,
+# de esta forma se puede saber las columnas que tiene y utilizarlas puntualmente por medio de $
+names(lm.fit)
+
+# ejemplo de funcion coef para extraer los coeficientes del modelo, esto sería "m" y "b"
+# obsérvese que muestra cual es el intercepto
+
+coef(lm.fit)
+
+# si se desea tener el intervalo de confianza (un rango para los parámetros), se utiliza la funcion siguiente
+confint(lm.fit)
+
+# Ahora se va a utilizar una función para predecir el intervalo de confianza dado un conjunto de elementos 
+# de muestra para la variable X o predictor, en este caso lstat
+
+predict(lm.fit, data.frame(lstat=c(5,10,15)), interval="confidence")
+
+predict(lm.fit, data.frame(lstat=c(5,10,15)), interval="prediction")
+
+
+```
+```{r}
+### Sección para graficar o plotear la función
+
+plot(lstat ,medv)
+abline (lm.fit)
+
+abline (lm.fit ,lwd =3)
+abline (lm.fit ,lwd =3, col ="red ")
+plot(lstat ,medv ,col ="red ")
+plot(lstat ,medv ,pch =20)
+plot(lstat ,medv ,pch ="+")
+plot (1:20 ,1:20, pch =1:20)
+
+
+
+
+```
+
+```{r}
+## Separación por paneles
+
+par(mfrow =c(2,2))
+plot(lm.fit)
+
+```
+
+```{r}
+## ploteo de las funciones residuales
+
+plot(predict (lm.fit), residuals (lm.fit))
+plot(predict (lm.fit), rstudent (lm.fit))
+```
+
+```{r}
+# Se observa la no linealidad en la tendencia
+
+plot(hatvalues (lm.fit ))
+which.max (hatvalues (lm.fit))
+
+```
+
+
+Multiple Linear Regression
+
+```{r}
+## Creación de la predicción con la variable año
+lm.fit =lm(medv~lstat+age ,data=Boston )
+summary (lm.fit)
+## OBservación de los coeficientes para ambas variables
+```
+Modelo para muchas variables, se coloca "." para indicar que se utiliza el resto de variables modelado para "medv"
+```{r}
+
+lm.fit =lm(medv~.,data=Boston ) 
+summary (lm.fit)
+## observese como se obtienen los coeficientes del modelo para las demás 13 variables
+```
+
+
+Ahora nos vamos a pasar a utilizar el paquete "Car", para ello, se procede a instalar por medio de la siguiente instrucción:
+```{r}
+#install.packages("car")
+#install.packages("carData")
+```
+
+
+```{r}
+## Se comienta con el ejemplo
+library (car)
+vif(lm.fit)
+```
+```{r}
+# En el ejemplo siguiente se aplica una regresión para todas las variables excluyendo "age"
+
+lm.fit1=lm(medv~.-age ,data=Boston )
+summary (lm.fit1)
+
+```
+```{r}
+## De forma alternativa se puede utilizar update()
+lm.fit1=update (lm.fit , ~.-age)
+
+```
+
+
+TERMINOS DE INTERACCIÓN:
+
+```{r}
+summary (lm(medv~lstat *age ,data=Boston ))
+```
+TRANSFORMACIÓN DE VARIABLES PREDICTORES EN MODELOS NO LINEALES:
+```{r}
+lm.fit2=lm(medv~lstat +I(lstat ^2))
+summary (lm.fit2)
+
+```
+
+```{r}
+
+lm.fit =lm(medv~lstat)
+anova(lm.fit ,lm.fit2)
+# En este caso, se tienen 2 modelos para un solo predictor
+```
+
+```{r}
+## Comparando los modelos
+par(mfrow=c(2,2))
+plot(lm.fit2)
+
+```
+
+Para crear modelos polinomiales por medio de la función "lm" se va a utilizar la palabra "poly", en este ejemplo, se crea uno de grado 5.
+```{r}
+
+lm.fit5=lm(medv~poly(lstat ,5))
+summary (lm.fit5)
+
+# Obserserve los coeficientes que acompañan a cada variable
+```
+
+```{r}
+# Resumen del modelo de grado 5
+summary (lm(medv~log(rm),data=Boston ))
+
+```
+
+
+
+PREDICTORES CUALITATIVOS:
+Para estos ejemplos, se utilizarán los datos cargados de ISLR "Carseats"
+```{r}
+
+fix(Carseats)
+names(Carseats)
+## Observar sus variables 
+```
+
+R genera variables ficticias para este tipo de problema:
+```{r}
+lm.fit =lm(Sales~.+ Income :Advertising +Price :Age ,data=Carseats )
+summary (lm.fit)
+
+```
+```{r}
+# El siguiente código muestra las variables ficticias que R ha creado para resolver el problema por medio de "contrasts"
+attach (Carseats )
+contrasts (ShelveLoc )
+```
+
+
+ESCRITURA DE FUNCIONES:
+
+En R como en la mayoría de lenguajes de programación, es posible crear funciones propias, por ejemplo:
+
+```{r}
+LoadLibraries=function (){
+ library (ISLR)
+ library (MASS)
+ print (" The libraries have been loaded .")
+ }
+
+```
+
+```{r}
+#Si queremos ve el código de la función, se escribe el nombre
+LoadLibraries
+```
+
+```{r}
+# Para poder utilizar la función se utilizan los paréntesis:
+LoadLibraries()
+```
+
